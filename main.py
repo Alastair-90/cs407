@@ -325,6 +325,35 @@ def plotAttackTypePercentage():
     plt.tight_layout()
     plt.show()
 
+def HealthcareAverageIncidenceByDayandMonth():
+    industryType = [('Healthcare','red'), ('Public', 'lightblue'), ('Educational','green'), ('Finance', 'darkyellow'), ('Information','darkblue'), ('Retail','grey'), ('Professional','purple'), ('Unknown', 'grey'), ('Manufacturing','orange'), ('Other Services', 'grey')]
+    for industry, indColor in industryType:
+        frame, sub = plt.subplots(3, 4, figsize=(30, 12), sharey=True)
+        frame.suptitle('Average Number of Incidents against ' + industry, fontsize=16)
+        sub = sub.flatten()
+
+        for month in range(1, 13):
+            healthcare_data = data[data['victim.industry.name'] == industry]
+            month_data = healthcare_data[
+                (healthcare_data['timeline.incident.month'] == month) &
+                (healthcare_data['timeline.incident.year'] >= 2005)
+            ]
+
+            day_counts = month_data['timeline.incident.day'].value_counts().sort_index()
+            day_counts = day_counts.reindex(range(1, 32), fill_value=0)
+            ax = sub[month - 1]
+
+            ax.plot(day_counts.index, day_counts.values, marker='o', color=indColor)
+            ax.fill_between(day_counts.index, day_counts.values, color=indColor, alpha=0.5)
+            ax.set_title(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][month - 1])
+            ax.set_xlabel('Day')
+            ax.set_ylabel('Average Incidents')
+            ax.set_xticks(range(1, 32))
+            ax.grid(True)
+
+        plt.tight_layout()
+        plt.show()
+
 
 if __name__ == '__main__':
     allYears = data['timeline.incident.year'].where(data['timeline.incident.year'] >= 2005).dropna()
@@ -347,3 +376,5 @@ if __name__ == '__main__':
 
     plotIncidentsByYearWithHolidays()
     plotAttackTypePercentage()
+
+    HealthcareAverageIncidenceByDayandMonth()
